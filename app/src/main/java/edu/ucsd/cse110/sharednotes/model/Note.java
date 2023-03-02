@@ -73,4 +73,8 @@ public class Note {
     public static Note fromJSON(String json) {
         return new Gson().fromJson(json, Note.class);
     }
+
+    public String toJSON() {
+        return new Gson().toJson(this);
+    }
 }
