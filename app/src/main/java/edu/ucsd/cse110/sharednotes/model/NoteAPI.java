@@ -2,7 +2,12 @@ package edu.ucsd.cse110.sharednotes.model;
 
 import android.util.Log;
 
+import androidx.annotation.AnyThread;
+
 import com.google.gson.Gson;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -69,10 +74,16 @@ public class NoteAPI {
         }
     }
 
+    @AnyThread
+    public Future<Note> getNoteAsync(String title) {
+        var executor = Executors.newSingleThreadExecutor();
+        return executor.submit(() -> getNote(title));
+    }
+
     public void putNote(Note note) {
         String encodedTitle = note.title.replace(" ", "%20");
 
-        String noteJson = new Gson().toJson(note);
+        String noteJson = new Gson().toJson(note, Note.class);
 
         var requestBody = RequestBody.create(noteJson, JSON);
 
@@ -88,5 +99,11 @@ public class NoteAPI {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+    }
+
+    @AnyThread
+    public void putNoteAsync(Note note) {
+        var executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> putNote(note));
     }
 }
