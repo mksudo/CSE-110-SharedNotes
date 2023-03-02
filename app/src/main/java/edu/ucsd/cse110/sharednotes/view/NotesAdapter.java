@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import edu.ucsd.cse110.sharednotes.R;
 import edu.ucsd.cse110.sharednotes.model.Note;
@@ -27,6 +26,38 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
 
     public void setOnNoteDeleteClickListener(Consumer<Note> onNoteDeleteClicked) {
         this.onNoteDeleteClicked = onNoteDeleteClicked;
+    }
+
+    public void setNotes(List<Note> notes) {
+        this.notes = notes;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        var view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.note_item, parent, false);
+
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        var note = notes.get(position);
+        holder.bind(note);
+    }
+
+    @Override
+    public int getItemCount() {
+        return notes.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        // We don't actually have a unique int/long ID on the Note object, so instead
+        // we generate a unique ID based on the title. It is possible that two notes
+        // could have different titles but the same hash code, but it is beyond unlikely.
+        return notes.get(position).title.hashCode();
     }
 
     /**
@@ -55,37 +86,5 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
             itemView.setOnClickListener(v -> onNoteClicked.accept(note));
             deleteButton.setOnClickListener(v -> onNoteDeleteClicked.accept(note));
         }
-    }
-
-    public void setNotes(List<Note> notes) {
-        this.notes = notes;
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        var view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.note_item, parent, false);
-
-        return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        var note = notes.get(position);
-        holder.bind(note);
-    }
-
-    @Override
-    public int getItemCount() {
-        return notes.size();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        // We don't actually have a unique int/long ID on the Note object, so instead
-        // we generate a unique ID based on the title. It is possible that two notes
-        // could have different titles but the same hash code, but it is beyond unlikely.
-        return notes.get(position).title.hashCode();
     }
 }

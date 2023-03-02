@@ -29,7 +29,7 @@ public class NoteAPI {
 
     /**
      * An example of sending a GET request to the server.
-     *
+     * <p>
      * The /echo/{msg} endpoint always just returns {"message": msg}.
      */
     public void echo(String msg) {

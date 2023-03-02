@@ -13,8 +13,8 @@ import edu.ucsd.cse110.sharednotes.model.NoteDatabase;
 import edu.ucsd.cse110.sharednotes.model.NoteRepository;
 
 public class ListViewModel extends AndroidViewModel {
-    private LiveData<List<Note>> notes;
     private final NoteRepository repo;
+    private LiveData<List<Note>> notes;
 
     public ListViewModel(@NonNull Application application) {
         super(application);
@@ -26,6 +26,7 @@ public class ListViewModel extends AndroidViewModel {
 
     /**
      * Load all notes from the database.
+     *
      * @return a LiveData object that will be updated when any notes change.
      */
     public LiveData<List<Note>> getNotes() {
@@ -37,6 +38,7 @@ public class ListViewModel extends AndroidViewModel {
 
     /**
      * Open a note in the database. If the note does not exist, create it.
+     *
      * @param title the title of the note
      * @return a LiveData object that will be updated when this note changes.
      */

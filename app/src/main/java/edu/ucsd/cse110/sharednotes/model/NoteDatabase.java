@@ -11,8 +11,6 @@ import androidx.room.RoomDatabase;
 public abstract class NoteDatabase extends RoomDatabase {
     private volatile static NoteDatabase instance = null;
 
-    public abstract NoteDao getDao();
-
     public synchronized static NoteDatabase provide(Context context) {
         if (instance == null) {
             instance = NoteDatabase.make(context);
@@ -28,9 +26,11 @@ public abstract class NoteDatabase extends RoomDatabase {
 
     @VisibleForTesting
     public static void inject(NoteDatabase testDatabase) {
-        if (instance != null ) {
+        if (instance != null) {
             instance.close();
         }
         instance = testDatabase;
     }
+
+    public abstract NoteDao getDao();
 }

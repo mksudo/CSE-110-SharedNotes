@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -15,8 +14,6 @@ import androidx.lifecycle.ViewModelProvider;
 import edu.ucsd.cse110.sharednotes.R;
 import edu.ucsd.cse110.sharednotes.model.Note;
 import edu.ucsd.cse110.sharednotes.model.NoteDao;
-import edu.ucsd.cse110.sharednotes.model.NoteDatabase;
-import edu.ucsd.cse110.sharednotes.viewmodel.ListViewModel;
 import edu.ucsd.cse110.sharednotes.viewmodel.NoteViewModel;
 
 public class NoteActivity extends AppCompatActivity {
@@ -24,6 +21,15 @@ public class NoteActivity extends AppCompatActivity {
     private LiveData<Note> note;
     private NoteDao dao;
     private EditText contentView;
+
+    /**
+     * Utility method to create an intent for this activity.
+     */
+    public static Intent intentFor(Context context, Note note) {
+        var intent = new Intent(context, NoteActivity.class);
+        intent.putExtra("note_title", note.title);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +42,7 @@ public class NoteActivity extends AppCompatActivity {
 
         var viewModel = setupViewModel();
         note = viewModel.getNote(title);
-        
+
         // Set up the toolbar.
         setupToolbar(title);
 
@@ -81,12 +87,5 @@ public class NoteActivity extends AppCompatActivity {
 
     private void onNoteChanged(Note note) {
         contentView.setText(note.content);
-    }
-
-    /** Utility method to create an intent for this activity. */
-    public static Intent intentFor(Context context, Note note) {
-        var intent = new Intent(context, NoteActivity.class);
-        intent.putExtra("note_title", note.title);
-        return intent;
     }
 }

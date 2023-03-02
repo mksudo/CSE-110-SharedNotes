@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class NoteRepository {
@@ -29,7 +28,7 @@ public class NoteRepository {
      * updated when the note is updated either locally or remotely on the server. Our activities
      * however will only need to observe this one LiveData object, and don't need to care where
      * it comes from!
-     *
+     * <p>
      * This method will always prefer the newest version of the note.
      *
      * @param title the title of the note

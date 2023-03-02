@@ -30,13 +30,17 @@ class TimestampAdapter extends TypeAdapter<Long> {
 
 @Entity(tableName = "notes")
 public class Note {
-    /** The title of the note. Used as the primary key for shared notes (even on the cloud). */
+    /**
+     * The title of the note. Used as the primary key for shared notes (even on the cloud).
+     */
     @PrimaryKey
     @SerializedName("title")
     @NonNull
     public String title;
 
-    /** The content of the note. */
+    /**
+     * The content of the note.
+     */
     @SerializedName("content")
     @NonNull
     public String content;
@@ -50,7 +54,9 @@ public class Note {
     @SerializedName(value = "updated_at", alternate = "updatedAt")
     public long updatedAt = 0;
 
-    /** General constructor for a note. */
+    /**
+     * General constructor for a note.
+     */
     public Note(@NonNull String title, @NonNull String content) {
         this.title = title;
         this.content = content;

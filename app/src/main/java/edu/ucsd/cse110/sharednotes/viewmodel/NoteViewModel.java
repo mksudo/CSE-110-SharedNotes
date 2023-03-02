@@ -11,8 +11,8 @@ import edu.ucsd.cse110.sharednotes.model.NoteDatabase;
 import edu.ucsd.cse110.sharednotes.model.NoteRepository;
 
 public class NoteViewModel extends AndroidViewModel {
-    private LiveData<Note> note;
     private final NoteRepository repo;
+    private LiveData<Note> note;
 
     public NoteViewModel(@NonNull Application application) {
         super(application);
