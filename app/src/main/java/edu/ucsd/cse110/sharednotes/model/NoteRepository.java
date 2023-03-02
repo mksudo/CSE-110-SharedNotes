@@ -2,16 +2,23 @@ package edu.ucsd.cse110.sharednotes.model;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class NoteRepository {
     private final NoteDao dao;
+    private final Map<String, MutableLiveData<Note>> noteCache;
 
     public NoteRepository(NoteDao dao) {
         this.dao = dao;
+        this.noteCache = new HashMap<>();
     }
 
     // Synced Methods
@@ -79,10 +86,6 @@ public class NoteRepository {
     // ==============
 
     public LiveData<Note> getRemote(String title) {
-        // TODO: Implement getRemote!
-        // TODO: Set up polling background thread (MutableLiveData?)
-        // TODO: Refer to TimerService from https://github.com/DylanLukes/CSE-110-WI23-Demo5-V2.
-
         // Start by fetching the note from the server _once_ and feeding it into MutableLiveData.
         // Then, set up a background thread that will poll the server every 3 seconds.
 
@@ -90,11 +93,26 @@ public class NoteRepository {
         // you don't create a new polling thread every time you call getRemote with the same title.
         // You don't need to worry about killing background threads.
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        var noteLiveData = noteCache.getOrDefault(title, null);
+
+        if (noteLiveData != null) return noteLiveData;
+
+        var note = NoteAPI.provide().getNote(title);
+
+        if (note == null) note = new Note(title, "");
+
+        noteLiveData = new MutableLiveData<>(note);
+
+        noteCache.put(note.title, noteLiveData);
+
+        var executor = Executors.newSingleThreadScheduledExecutor();
+        var finalNoteLiveData = noteLiveData;
+        executor.scheduleAtFixedRate(() -> finalNoteLiveData.postValue(NoteAPI.provide().getNote(title)), 0, 3000, TimeUnit.MILLISECONDS);
+
+        return noteLiveData;
     }
 
     public void upsertRemote(Note note) {
-        // TODO: Implement upsertRemote!
-        throw new UnsupportedOperationException("Not implemented yet");
+        NoteAPI.provide().putNote(note);
     }
 }
