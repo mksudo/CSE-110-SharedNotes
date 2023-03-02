@@ -8,8 +8,10 @@ import androidx.lifecycle.Observer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class NoteRepository {
     private final NoteDao dao;
@@ -69,7 +71,7 @@ public class NoteRepository {
     }
 
     public void upsertLocal(Note note) {
-        note.updatedAt = System.currentTimeMillis();
+        note.updatedAt = System.currentTimeMillis() / 1000;
         dao.upsert(note);
     }
 
@@ -96,22 +98,35 @@ public class NoteRepository {
 
         if (noteLiveData != null) return noteLiveData;
 
-        var note = NoteAPI.provide().getNote(title);
+        Note note = null;
+
+        try {
+            note = NoteAPI.provide().getNoteAsync(title).get(10, TimeUnit.SECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException exception) {
+            exception.printStackTrace();
+        }
 
         if (note == null) note = new Note(title, "");
 
-        noteLiveData = new MutableLiveData<>(note);
+        noteLiveData = new MutableLiveData<>();
+        noteLiveData.postValue(note);
 
         noteCache.put(note.title, noteLiveData);
 
         var executor = Executors.newSingleThreadScheduledExecutor();
         var finalNoteLiveData = noteLiveData;
-        executor.scheduleAtFixedRate(() -> finalNoteLiveData.postValue(NoteAPI.provide().getNote(title)), 0, 3000, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                finalNoteLiveData.postValue(NoteAPI.provide().getNoteAsync(title).get(10, TimeUnit.SECONDS));
+            } catch (ExecutionException | InterruptedException | TimeoutException exception) {
+                exception.printStackTrace();
+            }
+        }, 0, 3000, TimeUnit.MILLISECONDS);
 
         return noteLiveData;
     }
 
     public void upsertRemote(Note note) {
-        NoteAPI.provide().putNote(note);
+        NoteAPI.provide().putNoteAsync(note);
     }
 }
