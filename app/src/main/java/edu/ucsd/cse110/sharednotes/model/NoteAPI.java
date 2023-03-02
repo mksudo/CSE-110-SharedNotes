@@ -3,8 +3,7 @@ package edu.ucsd.cse110.sharednotes.model;
 import android.util.Log;
 
 import androidx.annotation.AnyThread;
-
-import com.google.gson.Gson;
+import androidx.annotation.WorkerThread;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,13 +35,17 @@ public class NoteAPI {
      * An example of sending a GET request to the server.
      * <p>
      * The /echo/{msg} endpoint always just returns {"message": msg}.
+     * <p>
+     * This method should can be called on a background thread (Android
+     * disallows network requests on the main thread).
      */
-    public void echo(String msg) {
+    @WorkerThread
+    public String echo(String msg) {
         // URLs cannot contain spaces, so we replace them with %20.
-        msg = msg.replace(" ", "%20");
+        String encodedMsg = msg.replace(" ", "%20");
 
         var request = new Request.Builder()
-                .url("https://sharednotes.goto.ucsd.edu/echo/" + msg)
+                .url("https://sharednotes.goto.ucsd.edu/echo/" + encodedMsg)
                 .method("GET", null)
                 .build();
 
@@ -50,11 +53,14 @@ public class NoteAPI {
             assert response.body() != null;
             var body = response.body().string();
             Log.i("ECHO", body);
+            return body;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
 
+    @WorkerThread
     public Note getNote(String title) {
         String encodedTitle = title.replace(" ", "%20");
 
@@ -80,10 +86,11 @@ public class NoteAPI {
         return executor.submit(() -> getNote(title));
     }
 
+    @WorkerThread
     public void putNote(Note note) {
         String encodedTitle = note.title.replace(" ", "%20");
 
-        String noteJson = new Gson().toJson(note, Note.class);
+        String noteJson = note.toJSON();
 
         var requestBody = RequestBody.create(noteJson, JSON);
 
